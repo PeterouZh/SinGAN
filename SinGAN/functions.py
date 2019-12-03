@@ -253,7 +253,7 @@ def generate_in2coarsest(reals,scale_v,scale_h,opt):
         in_s = upsampling(real_down, real_down.shape[2], real_down.shape[3])
     return in_s
 
-def generate_dir2save(opt):
+def generate_dir2save(opt, root_dir):
     dir2save = None
     if (opt.mode == 'train') | (opt.mode == 'SR_train'):
         dir2save = 'TrainedModels/%s/scale_factor=%f,alpha=%d' % (opt.input_name[:-4], opt.scale_factor_init,opt.alpha)
@@ -277,6 +277,8 @@ def generate_dir2save(opt):
         dir2save = '%s/Paint2image/%s/%s_out' % (opt.out, opt.input_name[:-4],opt.ref_name[:-4])
         if opt.quantization_flag:
             dir2save = '%s_quantized' % dir2save
+
+    dir2save = os.path.join(root_dir, dir2save)
     return dir2save
 
 def post_config(opt):

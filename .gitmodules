@@ -1,0 +1,6 @@
+[submodule "SinGAN-exp"]
+	path = SinGAN-exp
+	url = https://github.com/PeterouZh/SinGAN-exp.git
+[submodule "submodule/template_lib"]
+	path = submodule/template_lib
+	url = https://github.com/PeterouZh/template_lib.git

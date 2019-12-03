@@ -8,7 +8,7 @@ import math
 import matplotlib.pyplot as plt
 from SinGAN.imresize import imresize
 
-def train(opt,Gs,Zs,reals,NoiseAmp):
+def train(opt,Gs,Zs,reals,NoiseAmp, myargs):
     real_ = functions.read_image(opt)
     in_s = 0
     scale_num = 0
@@ -20,7 +20,7 @@ def train(opt,Gs,Zs,reals,NoiseAmp):
         opt.nfc = min(opt.nfc_init * pow(2, math.floor(scale_num / 4)), 128)
         opt.min_nfc = min(opt.min_nfc_init * pow(2, math.floor(scale_num / 4)), 128)
 
-        opt.out_ = functions.generate_dir2save(opt)
+        opt.out_ = functions.generate_dir2save(opt, myargs.args.outdir)
         opt.outf = '%s/%d' % (opt.out_,scale_num)
         try:
             os.makedirs(opt.outf)
@@ -36,7 +36,8 @@ def train(opt,Gs,Zs,reals,NoiseAmp):
             G_curr.load_state_dict(torch.load('%s/%d/netG.pth' % (opt.out_,scale_num-1)))
             D_curr.load_state_dict(torch.load('%s/%d/netD.pth' % (opt.out_,scale_num-1)))
 
-        z_curr,in_s,G_curr = train_single_scale(D_curr,G_curr,reals,Gs,Zs,in_s,NoiseAmp,opt)
+        z_curr,in_s,G_curr = train_single_scale(
+            D_curr,G_curr,reals,Gs,Zs,in_s,NoiseAmp,opt, myargs=myargs)
 
         G_curr = functions.reset_grads(G_curr,False)
         G_curr.eval()
@@ -59,7 +60,8 @@ def train(opt,Gs,Zs,reals,NoiseAmp):
 
 
 
-def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,centers=None):
+def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,
+                       centers=None, myargs=None):
 
     real = reals[len(Gs)]
     opt.nzx = real.shape[2]#+(opt.ker_size-1)*(opt.num_layer)
@@ -197,7 +199,8 @@ def train_single_scale(netD,netG,reals,Gs,Zs,in_s,NoiseAmp,opt,centers=None):
         z_opt2plot.append(rec_loss)
 
         if epoch % 25 == 0 or epoch == (opt.niter-1):
-            print('scale %d:[%d/%d]' % (len(Gs), epoch, opt.niter))
+            print('\r', end='scale %d:[%d/%d]' % (len(Gs), epoch, opt.niter),
+                  file=myargs.stdout, flush=True)
 
         if epoch % 500 == 0 or epoch == (opt.niter-1):
             plt.imsave('%s/fake_sample.png' %  (opt.outf), functions.convert_image_np(fake.detach()), vmin=0, vmax=1)
